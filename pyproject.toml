@@ -5,12 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sahayak-ai"
 version = "0.1.0"
-description = "Autonomous RL Navigation System for Meta OpenEnv"
+description = "Autonomous RL Navigation System"
 dependencies = [
     "fastapi",
     "uvicorn",
     "gymnasium",
-    "numpy",
+    "numpy<2.0.0",
     "openai",
-    "requests"
+    "requests",
+    "openenv>=0.2.0"
 ]
+
+[project.scripts]
+server = "app.main:app"
