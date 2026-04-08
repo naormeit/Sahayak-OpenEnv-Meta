@@ -1,0 +1,8 @@
+version: "1.0"
+name: "Sahayak-OpenEnv-Meta"
+entry_point: "app.main:app"
+environment:
+  level: 1
+  max_steps: 50
+  observation_space: "Box(2,)"
+  action_space: "Discrete(4)"
