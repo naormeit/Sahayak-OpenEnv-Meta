@@ -51,7 +51,7 @@ graph TD
 - The project includes a Dockerfile optimized for Python 3.10-slim and Hugging Face Spaces.
 - Entrypoint runs a Uvicorn FastAPI server exposing the OpenEnv endpoints required for automated grading.
 
-## Developer
+## Developers
 - **Name:** Naorem Ngathoiba Singh
 - **Role:** Software Product Engineering Student, Kalvium (Alliance University)
 - **LinkedIn:** [https://www.linkedin.com/in/naoremnganthoiba]
