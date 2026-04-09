@@ -6,3 +6,16 @@ environment:
   max_steps: 50
   observation_space: "Box(2,)"
   action_space: "Discrete(4)"
+
+# ADDED: This section defines the 3 tasks required for Phase 2
+evaluation:
+  tasks:
+    - id: path_efficiency
+      name: "Path Efficiency Score"
+      weight: 0.4
+    - id: goal_convergence
+      name: "Goal Convergence Rate"
+      weight: 0.3
+    - id: instruction_adherence
+      name: "LLM Instruction Adherence"
+      weight: 0.3
