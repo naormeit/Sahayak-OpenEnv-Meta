@@ -15,7 +15,13 @@ class ResetRequest(BaseModel):
 
 @app.get("/")
 def root():
-    return {"status": "Sahayak AI Live", "level": env.level, "task": env.current_task}
+    # FIX: Deriving the task name from the new task registry index
+    current_task_name = env.tasks[env._current_task_idx]
+    return {
+        "status": "Sahayak AI Live", 
+        "level": env.level, 
+        "task": current_task_name
+    }
 
 @app.get("/state")
 def get_state():
