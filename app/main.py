@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from app.env import SahayakEnv
 from pydantic import BaseModel
+from typing import Optional, List
 import numpy as np
 
 app = FastAPI()
-# Initialize the environment
 env = SahayakEnv(level=1)
 
 class StepRequest(BaseModel):
@@ -12,16 +12,26 @@ class StepRequest(BaseModel):
 
 class ResetRequest(BaseModel):
     level: int = 1
+    task_id: Optional[str] = None
+
+class GradeRequest(BaseModel):
+    observation: List[float]
+    action: int
+    task_id: Optional[str] = None
 
 @app.get("/")
 def root():
-    # FIX: Deriving the task name from the new task registry index
-    current_task_name = env.tasks[env._current_task_idx]
     return {
         "status": "Sahayak AI Live", 
         "level": env.level, 
-        "task": current_task_name
+        "task": env.current_task,
+        "available_tasks": env.tasks
     }
+
+@app.get("/tasks")
+def get_tasks():
+    # MANDATORY: Allows validator to discover your 3 tasks
+    return {"tasks": env.tasks}
 
 @app.get("/state")
 def get_state():
@@ -30,11 +40,8 @@ def get_state():
 @app.post("/reset")
 def reset(req: ResetRequest = ResetRequest()):
     global env
-    # Update level if changed
     env.level = req.level
-    obs, info = env.reset()
-    
-    # Ensure observation is a list for JSON compatibility
+    obs, info = env.reset(task_id=req.task_id)
     return {
         "observation": obs.tolist() if isinstance(obs, np.ndarray) else obs, 
         "info": info
@@ -43,8 +50,6 @@ def reset(req: ResetRequest = ResetRequest()):
 @app.post("/step")
 def step(req: StepRequest):
     obs, reward, terminated, truncated, info = env.step(req.action)
-    
-    # Phase 2 Critical: Ensure reward is a standard float and scores are in range
     return {
         "observation": obs.tolist() if isinstance(obs, np.ndarray) else obs,
         "reward": float(reward),
@@ -53,3 +58,11 @@ def step(req: StepRequest):
         "truncated": bool(truncated),
         "info": info
     }
+
+@app.post("/grade")
+def grade(req: GradeRequest):
+    # MANDATORY: Allows validator to test graders independently
+    if req.task_id:
+        env.current_task = req.task_id
+    score = env.grader(req.observation, req.action)
+    return {"score": float(score)}
