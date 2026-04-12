@@ -1,8 +1,15 @@
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-# Add this line explicitly to resolve Observation/Action errors
-from openenv import Observation, Action
+
+# Safer import for OpenEnv types
+try:
+    from openenv import Observation, Action
+except ImportError:
+    # Fallback if the library structure differs on Hugging Face
+    from typing import Any
+    Observation = Any
+    Action = Any
 
 class SahayakEnv(gym.Env):
     def __init__(self, level=1):
