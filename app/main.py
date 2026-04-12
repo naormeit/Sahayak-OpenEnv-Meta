@@ -19,7 +19,7 @@ class GradeRequest(BaseModel):
 
 @app.get("/")
 def root():
-    return {"status": "ok", "tasks": env.tasks}
+    return {"status": "ok", "tasks": env.tasks, "current": env.current_task}
 
 @app.get("/tasks")
 def tasks_list():
@@ -37,6 +37,5 @@ def step(req: StepRequest):
 
 @app.post("/grade")
 def grade(req: GradeRequest):
-    # Validator tests this endpoint to verify all 3 tasks
     score = env.grader(req.observation, req.action, task_id=req.task_id)
     return {"score": score, "task_id": req.task_id or env.current_task}
