@@ -21,48 +21,39 @@ class GradeRequest(BaseModel):
 
 @app.get("/")
 def root():
-    return {
-        "status": "Sahayak AI Live", 
-        "level": env.level, 
-        "task": env.current_task,
-        "available_tasks": env.tasks
-    }
+    return {"status": "live", "tasks": env.tasks, "current": env.current_task}
 
 @app.get("/tasks")
 def get_tasks():
-    # MANDATORY: Allows validator to discover your 3 tasks
+    # Returns the bare list the validator is looking for
     return {"tasks": env.tasks}
-
-@app.get("/state")
-def get_state():
-    return env.state()
 
 @app.post("/reset")
 def reset(req: ResetRequest = ResetRequest()):
-    global env
-    env.level = req.level
     obs, info = env.reset(task_id=req.task_id)
     return {
-        "observation": obs.tolist() if isinstance(obs, np.ndarray) else obs, 
-        "info": info
+        "observation": obs.tolist(), 
+        "info": info,
+        "task": env.current_task
     }
 
 @app.post("/step")
 def step(req: StepRequest):
     obs, reward, terminated, truncated, info = env.step(req.action)
     return {
-        "observation": obs.tolist() if isinstance(obs, np.ndarray) else obs,
+        "observation": obs.tolist(),
         "reward": float(reward),
         "done": bool(terminated or truncated),
-        "terminated": bool(terminated),
-        "truncated": bool(truncated),
         "info": info
     }
 
 @app.post("/grade")
 def grade(req: GradeRequest):
-    # MANDATORY: Allows validator to test graders independently
+    # This endpoint specifically allows the bot to test your scores
+    temp_task = env.current_task
     if req.task_id:
         env.current_task = req.task_id
+    
     score = env.grader(req.observation, req.action)
-    return {"score": float(score)}
+    env.current_task = temp_task # Reset back
+    return {"score": float(score), "task": req.task_id or env.current_task}
