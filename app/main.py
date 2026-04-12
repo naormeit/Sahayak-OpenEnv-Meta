@@ -2,28 +2,23 @@ from fastapi import FastAPI
 from app.env import SahayakEnv
 from pydantic import BaseModel
 from typing import Optional, List
+import numpy as np
 
 app = FastAPI()
 env = SahayakEnv()
 
-class StepRequest(BaseModel):
-    action: int
-
-class ResetRequest(BaseModel):
-    task_id: Optional[str] = None
-
+class StepRequest(BaseModel): action: int
+class ResetRequest(BaseModel): task_id: Optional[str] = None
 class GradeRequest(BaseModel):
     observation: List[float]
     action: int
     task_id: Optional[str] = None
 
 @app.get("/")
-def root():
-    return {"status": "ok", "tasks": env.tasks, "current": env.current_task}
+def root(): return {"status": "ok", "tasks": env.tasks}
 
 @app.get("/tasks")
-def tasks_list():
-    return {"tasks": env.tasks}
+def get_tasks(): return {"tasks": env.tasks}
 
 @app.post("/reset")
 def reset(req: ResetRequest = ResetRequest()):
@@ -38,4 +33,4 @@ def step(req: StepRequest):
 @app.post("/grade")
 def grade(req: GradeRequest):
     score = env.grader(req.observation, req.action, task_id=req.task_id)
-    return {"score": score, "task_id": req.task_id or env.current_task}
+    return {"score": score}
